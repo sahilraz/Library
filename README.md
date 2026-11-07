@@ -1,167 +1,202 @@
-# 📱 Production-Ready Multi-Library Management SaaS
+# 📚 Libr — Production-Ready Multi-Library & Study Center SaaS
 
-A complete, production-ready, mobile-first **Multi-Library & Study Center Management SaaS** platform engineered to behave and feel like a premium native iOS application (designed around a 430px mobile viewport, safe-area insets, fluid spring micro-interactions, ReactBits components, bottom navigation, bottom sheets, and PWA/Android APK readiness).
+A comprehensive, production-ready, full-stack **Multi-Library & Study Center Management SaaS** platform. Built with a responsive, modern UI powered by CSS `clamp()`, React 18, Vite, Node.js, Express, and MongoDB. Seamlessly adapts across mobile devices (320px–430px), tablets, laptops, and ultra-wide desktop monitors, while remaining PWA and native wrapper (Capacitor/Cordova) ready.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Architecture
 
-### 1. Multi-Tenant Role-Based Architecture
-- **Super Admin (Platform Owner)**:
-  - Global overview metrics: Revenue, Total/Active Admins, Managers, Patrons, Branches, Pending/Approved Payments.
-  - Organization inspection: 10 dedicated tabs per library (Profile, Subscription & Limits, Payments, Branches, Managers, Users, Plans, Seats, Expenses, Audit Trail).
-  - SaaS Plan Creator (`/plan-creator`): Custom quotas, pricing, Days/Months/Years validity switch, and dynamic feature chips.
-  - Payment Review (`/admin-payments`): Approve or reject library subscription purchases with UTR & screenshot verification.
-  - Platform Payment Gateway: Configure Super Admin UPI ID, QR code upload, and payment instructions.
-  - Platform Security Audit Trail: Full system activity logs.
-  - Initial Super Admin auto-created on first startup with forced password change on first login.
+### 1. Super Admin (Platform Owner)
+- **Interactive Statistics Cards**:
+  - All dashboard statistics cards are interactive and clickable, linking directly to dedicated listing pages:
+    - **Libraries (Admins)** &rarr; `/superadmin/admins`
+    - **Branches** &rarr; `/superadmin/branches`
+    - **Managers** &rarr; `/superadmin/managers`
+    - **Students / Patrons** &rarr; `/superadmin/users`
+    - **Platform Revenue & Payments** &rarr; `/superadmin/payments`
+  - Each listing page includes real-time search, status filters, branch filters, pagination, and empty/loading states.
+- **Comprehensive Profile & Operational History**:
+  - **Admin Details (`/superadmin/admins/:adminId`)**: Personal contact info, assigned branches, SaaS quotas, student metrics, complete login/logout session history (with IP, user agent, and last active timestamps), and human-friendly operational activity timeline.
+  - **Manager Details (`/superadmin/managers/:managerId`)**: Profile info, supervising library admin, assigned branch, active managed students, login session history, and branch operational actions.
+  - **Student Details (`/superadmin/users/:userId`)**: Profile photo, contact and guardian info, batch timings, assigned seat, subscription and payment records, renewal logs, and printable digital ID card generator.
+- **WhatsApp Message Templates Engine (`/superadmin/templates`)**:
+  - Database-backed template management system seeded with 17 predefined templates across 7 categories (*Expiry, Billing, Subscription, Allocation, Enrollment, Announcement, General*).
+  - Dynamic placeholders supporting `{{student_name}}`, `{{student_phone}}`, `{{branch_name}}`, `{{batch_name}}`, `{{seat_number}}`, `{{expiry_date}}`, `{{remaining_days}}`, `{{payment_amount}}`, etc.
+  - Super Admin CRUD interface with dynamic placeholder insertion chips, category filters, and live preview with mock data.
+- **Human-Friendly Platform Activity (`/superadmin/activity`)**:
+  - Replaces raw developer codes with natural language event summaries (e.g. *"Rahul Sharma's student information was updated by Admin"*, *"The assigned seat for Rahul Sharma was changed from Desk 12 to Desk 15"*).
+  - Actor badges, relative timestamps, affected resource tags, and before/after value diffs.
+  - Collapsible technical metadata drawer preserving raw JSON payloads for auditing and security compliance.
+- **SaaS Plans & Financials**:
+  - Custom SaaS plan creator (`/superadmin/plans`) with Days/Months/Years validity switch and granular resource quotas (branches, managers, students, seats, WhatsApp alerts).
+  - Review library subscription purchases (`/superadmin/payments`) with 12-digit UTR and payment screenshot verification.
+  - Platform Payment Gateway configuration for Super Admin UPI ID and QR code.
 
-- **Admin (Library / Study Hall Owner)**:
-  - Library Dashboard: Live SaaS quota utilization progress bars (Branches, Managers, Users, Seats, Messages, Queue).
-  - SaaS Plan Purchase: Browse platform plans, pay via Super Admin UPI/QR, submit 12-digit UTR and payment screenshot.
-  - Branch Management: Multi-branch creation strictly enforced by purchased SaaS plan limits.
-  - Staff Manager Management: Assign staff strictly to ONE branch with customizable boolean permission flags (`users_view`, `users_create`, `seats_view`, `seats_assign`, `queue_manage`, `expenses_manage`, `reminders_send`, `dashboard_view`, etc.).
-  - Student Membership Plans: Create custom patron subscription tiers (Days, Months, Years).
-  - Seat Management: Visual desk cards, auto-expiring seat reservations, assign/release seats.
-  - Student / Patron Management: Manage student list, entry statuses (`NONE`, `QUEUE`, `ACTIVE`, `EXPIRED`, `SUSPENDED`).
-  - Waiting Queue System: Direct entry queue with priority ranking and 1-tap promotion to active seat status.
-  - Branch Expense Tracker: Track electric, internet, water, and maintenance expenses per branch.
-  - Student Fee Verification: Approve or reject patron fee payments via UPI.
-  - Library Payment Gateway: Configure library-specific UPI ID and QR code for student fees.
-  - WhatsApp Reminders: Dynamic personalized `https://wa.me/{number}?text=...` generation with automated tracking for **2 days before expiry** and **on expiry day**.
-  - Organization Audit Logs: Tenant-scoped audit trail.
+---
 
-- **Manager (Branch Staff)**:
-  - Strictly scoped to their single assigned branch (`branchId`).
-  - Cannot access other branches, settings, or tenant configurations.
-  - Only features permitted by the library admin are displayed and accessible.
-  - Branch operations: View branch patrons, register walk-in students, assign desks, manage waiting queue, and log utility expenses.
+### 2. Library Admin (Study Hall / Library Owner)
+- **Expiring Students Section (Admin Dashboard)**:
+  - Dedicated real-time section highlighting students expiring within the next 5 days, expiring today, or already expired.
+  - Sorted by nearest expiry with color-coded status badges (amber for expiring soon, pulsing red for today, rose for expired).
+  - **One-Click Quick Actions**:
+    1. **Extend Expiry**: Add custom days or set new expiry date with instant database update.
+    2. **Update Details**: Edit personal info, guardian contact, address, and student photo.
+    3. **Change Batch**: Reassign student to another batch timing session with conflict verification.
+    4. **Change Seat**: Reassign student to any available seat in the branch.
+    5. **View Profile**: Direct link to the student's full detail page (`/admin/users/:userId`).
+    6. **WhatsApp Alert**: Opens the WhatsApp modal with pre-filled dynamic template messages.
+    7. **Cancel Subscription**: Safely cancels subscription and frees seat assignment with confirmation and audit tracking.
+- **Student Enrollment with Photo Upload**:
+  - Drag-and-drop or device camera/file browser selection.
+  - Instant client-side preview with replace and remove capabilities.
+  - Client-side validation (max 5MB, JPEG/PNG/WebP/GIF).
+  - Secure server-side image upload (`POST /api/upload/image`) integrated with ImgBB, keeping API keys protected on the server.
+- **Enhanced Seat Management (`/admin/seats`)**:
+  - Delete seat action on every desk card with confirmation modal.
+  - **Active Student Safety Check**: Automatically detects active student assignments across all batches; blocks deletion and displays student names if currently assigned.
+  - Live occupancy and available seat counters update immediately.
+- **Interactive WhatsApp Messaging**:
+  - Dynamic template selector reading active templates from the database.
+  - Automatic placeholder replacement with live editable preview.
+  - URL-encoded `wa.me` link generation and optional AIPlexy API dispatch.
+- **Branch & Staff Manager Delegation**:
+  - Manage multiple physical study centers within plan quotas.
+  - Assign staff managers strictly to one branch with granular boolean permissions (`users_view`, `users_create`, `seats_assign`, `expenses_manage`, `reminders_send`, etc.).
+- **Waiting Queue Management (`/admin/queue`)**:
+  - Priority queue for walk-in students with one-tap promotion to an active seat upon vacancy.
+- **Expense & Utility Tracker (`/admin/expenses`)**:
+  - Track electricity, rent, maintenance, and internet expenses per branch.
 
-- **User (Student / Library Patron)**:
-  - Public registration at `/api/public/register` with library and branch selection.
-  - Personal Study Pass: Plan name, active seat number, expiration date, and countdown of days remaining.
-  - Desk Allocation: Allocated desk details, branch operating hours, and address.
-  - Fee Payment: Browse library plans, pay via UPI/QR, and submit UTR for instant admin review.
-  - In-app Notification Center: Alerts on fee approvals, seat allocations, and renewal reminders.
-  - Account Profile: Password change and emergency contact management.
+---
+
+### 3. Staff Manager (Branch Operator)
+- Strictly scoped to their single assigned branch (`branchId`).
+- Feature access governed by admin-configured permissions.
+- Operational capabilities: walk-in student enrollment, desk assignment, queue processing, and daily branch expense logging.
+
+---
+
+### 4. Student / Patron (User Portal)
+- Public self-registration with branch selection.
+- **Personal Digital Study Pass**: Plan name, assigned desk number, branch timings, and remaining days countdown.
+- **Digital ID Card Generator**: Printable identity card with student photo, barcode/QR, branch name, and emergency contact.
+- Fee payment submission with UPI QR and UTR upload.
+- In-app notification center for fee approvals and renewal reminders.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Frontend**:
-  - React 18 + TypeScript + Vite
-  - Tailwind CSS + Apple System Design Tokens
-  - Framer Motion + ReactBits Micro-Interactions (`SpotlightCard`, `AnimatedCounter`, `ShinyText`, `ShimmerButton`, `PulseBadge`, `IOSToggle`, `SegmentedControl`, `BottomSheet`, `SkeletonLoader`)
-  - Lucide Icons
-  - Mobile-First Architecture (Centered 430px frame with safe area insets)
-  - PWA Web App Manifest for Android APK packaging
-
-- **Backend**:
-  - Node.js + Express + TypeScript
-  - MongoDB + Mongoose with compound indexes and reference integrity
-  - JWT Authentication + Bcrypt password hashing
-  - Server-side multi-tenant isolation (`adminId` and `branchId` scoping)
-  - Server-side subscription quota middleware (`checkPlanLimit`)
-  - Server-side subscription & seat auto-expiry verification + background worker
-  - Helmet, CORS, Rate Limiting, Central Error Handling, and Zod input validation
-  - Multer upload validation (MIME checking, random safe filenames, size limits)
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, Framer Motion |
+| **UI Components** | ReactBits (`SpotlightCard`, `AnimatedCounter`, `ShimmerButton`, `PulseBadge`, `IOSToggle`, `BottomSheet`, `SkeletonLoader`) |
+| **Responsive Engine** | CSS `clamp()`, `min()`, `max()`, responsive flex/grid layouts, mobile bottom nav + desktop top navigation |
+| **Backend** | Node.js, Express, TypeScript, tsx |
+| **Database** | MongoDB with Mongoose ODM, compound indexes, and reference integrity |
+| **Security & Auth** | JWT Authentication, Bcrypt password hashing, Helmet, CORS, Rate Limiting, Zod schema validation |
+| **File Uploads** | Multer memory storage, server-side ImgBB API proxy (`POST /api/upload/image`) |
+| **Messaging** | Dynamic WhatsApp URL generator (`wa.me`) + optional AIPlexy official API integration |
 
 ---
 
-## 🚀 Quick Start & Deployment
+## 🚀 Getting Started
 
-### 1. Environment Configuration
-The system only requires setting `MONGODB_URI`. Everything else has sensible production defaults.
+### 1. Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **MongoDB**: v6.0 or higher (local instance or MongoDB Atlas cluster)
 
-Create `.env` in the root:
+### 2. Environment Setup
+Create a `.env` file in the root directory:
+
 ```env
-# REQUIRED: Your MongoDB connection string (e.g. MongoDB Atlas or local MongoDB)
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5000
+
+# REQUIRED: MongoDB Connection String
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/libr_saas?retryWrites=true&w=majority
 
-# Optional settings (defaults provided):
-PORT=5000
-JWT_SECRET=production_super_secret_jwt_key_libr_saas_2026
+# JWT Security
+JWT_SECRET=your_super_secret_jwt_key_libr_saas_2026
+
+# Initial Super Admin Seed Credentials
 SUPERADMIN_EMAIL=owner@example.com
 SUPERADMIN_PASSWORD=ChangeThisImmediately
 SUPERADMIN_NAME=Platform Owner
-CLIENT_URL=http://localhost:5000
+
+# Optional: ImgBB API Key for Student Photo Hosting
+IMGBB_API_KEY=your_imgbb_api_key_here
+
+# Optional: AIPlexy Official WhatsApp API
+AIPLEXY_API_KEY=
+AIPLEXY_API_URL=https://api.aiplexy.com/v1/messages
+AIPLEXY_INSTANCE_ID=
+AIPLEXY_SENDER_NUMBER=
 ```
 
-### 2. Install Dependencies
+### 3. Installation
 ```bash
-# Install all dependencies in one command:
 npm install
 ```
 
-### 3. Run Development Server
-Both backend API and React frontend run together on a **single server and port** (default: `5000`) with full Vite HMR and zero concurrently:
+### 4. Running the Development Server
+Both the backend API and Vite frontend run simultaneously on **port 5000** with hot module replacement (HMR):
+
 ```bash
 npm run dev
 ```
-Open **`http://localhost:5000`** in your browser.
 
-### 4. Build & Production Start
-```bash
-# Production Build (Vite Client + Server TypeScript):
-npm run build
+Open [http://localhost:5000](http://localhost:5000) in your browser.
 
-# Start Production Server (Serves API + Client SPA from single port 5000):
-npm start
-```
+---
 
-### 5. Run Automated Sanity Tests
+## 🧪 Testing & Building
+
+### Run Automated Sanity Tests
+Validates subscription expiry calculations, WhatsApp URL formatter, dynamic template substitution engine, financial date range filters, student creation schemas, OTP verification, and batch timing validation:
+
 ```bash
 npm test
 ```
 
----
+### Production Build
+Compiles both the React client (via Vite) and server TypeScript (via `tsc`):
 
-## 🔑 Default Credentials & First-Run Initialization
+```bash
+npm run build
+```
 
-On first startup, the server automatically connects to MongoDB, syncs indexes, and creates:
-1. **Default Super Admin**:
-   - **Email**: `owner@example.com` (or value of `SUPERADMIN_EMAIL`)
-   - **Password**: `ChangeThisImmediately` (or value of `SUPERADMIN_PASSWORD`)
-   - *Security*: The Super Admin is flagged with `mustChangePassword: true` on first login.
-2. **Default Super Admin Payment Config**: Initialized with default UPI details.
-3. **Starter SaaS Plans**: Starter, Growth Pro, and Enterprise tiers created automatically so new library owners can immediately subscribe.
+### Start Production Server
+Serves the compiled production client and API from a single Node.js process:
 
----
-
-## 🔒 Security Architecture
-
-1. **Multi-Tenant Isolation**:
-   - Every library query and mutation is strictly scoped by `adminId` on the server.
-   - Staff managers are additionally scoped to their assigned `branchId`.
-   - Never trusts client-supplied tenant identifiers.
-2. **Server-Side Quota Enforcement**:
-   - Creating branches, managers, users, seats, or queue entries calls `checkPlanLimit(adminId, resource)`.
-   - If exceeded, returns structured JSON:
-     ```json
-     {
-       "success": false,
-       "code": "PLAN_LIMIT_REACHED",
-       "message": "Maximum branch limit reached for your plan."
-     }
-     ```
-3. **Granular Staff Permissions**:
-   - Staff managers cannot perform actions without explicit boolean permissions (`users_view`, `users_create`, `seats_assign`, etc.).
-4. **Audit Logging**:
-   - System and organization events (`LOGIN`, `LOGOUT`, `PAYMENT_APPROVED`, `SEAT_ASSIGNED`, etc.) are recorded with actor, IP, timestamp, and metadata.
+```bash
+npm start
+```
 
 ---
 
-## 📱 Mobile APK / PWA Preparation
+## 📋 Pre-Seeded Default Accounts
 
-The frontend is intentionally designed for mobile viewports with:
-- `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />`
-- Apple Touch & PWA manifest in `client/public/manifest.json`.
-- CSS safe-area insets (`env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`).
-- Touch target sizing and spring micro-interactions.
-- To package into an Android APK, open the project in **Capacitor**, **Cordova**, or wrap the production URL inside an Android WebView.
+On first database connection, the system automatically initializes:
+
+| Role | Email | Password | Details |
+|---|---|---|---|
+| **Super Admin** | `owner@example.com` | `ChangeThisImmediately` | Full platform control (prompted to change password on first login) |
+
+*Default SaaS Plans (Starter, Growth Pro, Enterprise), platform payment configuration, and 17 WhatsApp templates are also automatically seeded on first launch.*
+
+---
+
+## 📱 Mobile & PWA Ready
+
+- Fully responsive across mobile (320px–430px), tablet, and desktop viewports.
+- Web App Manifest included in `client/public/manifest.json`.
+- Safe-area inset support for notch and home indicator bars (`env(safe-area-inset-top)` / `env(safe-area-inset-bottom)`).
+- Can be packaged into native Android/iOS apps using **Capacitor** or **Cordova**.
 
 ---
 
 ## 📄 License
-ISC License. Built for production scale.
+ISC License. Built for production scale and reliability.
